@@ -1,0 +1,15 @@
+{
+	"name": "cygni-test",
+	"version": "0.0.0",
+	"author": "Santino Petrovic",
+	"scripts": {
+		"start": "node server.js"
+	},	
+	"private": true,
+	"dependencies": {
+		"body-parser": "^1.18.3",
+		"express": "^4.16.4",
+		"request": "^2.88.0",
+		"useragent": "^2.3.0"
+	}
+}
