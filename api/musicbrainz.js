@@ -23,17 +23,21 @@ module.exports = {
                 }
 
                 let arr = JSON.parse(body);
-                let wikiobj = arr.relations.find(i => i.type === 'wikidata');
-
-                if (typeof wikiobj === "undefined") {
-                    wikiurl = false;
+                if (arr.error) {
+                    callback({ success: false, error: arr.error });   
                 } else {
-                    wikiurl = wikiobj.url.resource; 
+                    let wikiobj = arr.relations.find(i => i.type === 'wikidata');
+
+                    if (typeof wikiobj === "undefined") {
+                        wikiurl = false;
+                    } else {
+                        wikiurl = wikiobj.url.resource; 
+                    }
+
+                    var releaseobj = arr["release-groups"];
+
+                    callback({ success: true, wikiurl: wikiurl, releaseobj: releaseobj});
                 }
-
-                var releaseobj = arr["release-groups"];
-
-                callback({ success: true, wikiurl: wikiurl, releaseobj: releaseobj});
             }            
         });
 

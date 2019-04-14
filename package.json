@@ -4,7 +4,7 @@
 	"author": "Santino Petrovic",
 	"scripts": {
 		"start": "node server.js"
-	},	
+	},
 	"private": true,
 	"dependencies": {
 		"body-parser": "^1.18.3",

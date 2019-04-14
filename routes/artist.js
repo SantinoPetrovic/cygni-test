@@ -12,6 +12,7 @@ router.get('/getUser', function(req, res) {
 	let wikidataTitle = '';
 	let wikipediaDescription = '';
 	let coverartArr = [];
+	let test = [];
 	if (req.query.mbid) {
 
 		// Call musicbrainz
@@ -32,7 +33,7 @@ router.get('/getUser', function(req, res) {
 							// Call extern apiWikipediaen function
 							wikipediaen.apiWikipediaen(wikidataTitle, function(wikipediadata){
 								// call handleWikipediaDescription function
-								handleWikipediaDescription(wikipediadata, req.query.mbid);
+								wikipediaDescription = handleWikipediaDescription(wikipediadata);
 							});
 
 						}
@@ -43,10 +44,10 @@ router.get('/getUser', function(req, res) {
 				}
 
 				if (musicbrainzdata.releaseobj) {
-					// Having problems with looping data and get the callback after all requests are done. I'm commenting out the function call.
-					// coverart.apiCoverart(musicbrainzdata.releaseobj, function(coverartdata) {
-						
-					// });
+				 	coverartCall(musicbrainzdata.releaseobj, function(coverartContent) {
+				 		// Call response function when coverart is done
+				 		returnRespone(req.query.mbid, wikipediaDescription, coverartContent);
+				 	});				 	
 				}				
 			}			
 		});		
@@ -55,17 +56,9 @@ router.get('/getUser', function(req, res) {
 		res.json( {success: false, msg: 'No defined mbid in url query.'});
 	}
 
-
-	// Question to Cygni: is it worth doing functions for handling requests and call imported module functions? Did not make it work properly, but here's my test:
-	// function wikidataFunction(wikiurl) {
-	// 	wikidata.apiWikidata(data.wikiurl, function(data) {
-	// 		return data;
-	// 	});
-	// }
-
 	function handleWikidata(data) {
 		let dataTitle = '';	
-		for (var i in data.data.entities) {
+		for (let i in data.data.entities) {
 			if (data.data.entities[i].sitelinks.enwiki.title) {
 				dataTitle = data.data.entities[i].sitelinks.enwiki.title;
 			}			
@@ -73,18 +66,32 @@ router.get('/getUser', function(req, res) {
 		return dataTitle;	
 	}
 
-	function handleWikipediaDescription(data, mbid) {
+	function handleWikipediaDescription(data) {
 		let dataDescription = '';
-		for (var i in data.data) {
+		for (let i in data.data) {
 			if (data.data[i].extract) {
 				dataDescription = data.data[i].extract;
 			}	
 		}
-		returnRespone(dataDescription, mbid);
+		return dataDescription;
 	}
 
-	function returnRespone(description, mbid) {
-		res.json( {mbid: req.query.mbid, data: description, albums: [] } );
+	function coverartCall(musicbrainzcontent, callback) {
+		let coverartContentArr = [];
+		for (let i = 0; i < musicbrainzcontent.length; i++) {			
+			coverart.apiCoverart(musicbrainzcontent[i], function(coverartdata) {
+				coverartContentArr.push(coverartdata.album);
+				// Compare array size between the passed parameter and the local variable
+				if (coverartContentArr.length >= musicbrainzcontent.length) {
+					callback(coverartContentArr);
+				}				
+			});
+		}		
+	}
+
+	function returnRespone(mbid, wikipedia, coverart) {
+		// Give json response to user
+		res.json( {mbid: mbid, description: wikipedia, albums: coverart } );
 	}
 
 });
